@@ -42,7 +42,6 @@ export const AuthProvider = ({children}) => {
             if(data.success){
                 setAuthUser(data.userData);
                 connectSocket(data.userData);
-                // eslint-disable-next-line react-hooks/immutability
                 axios.defaults.headers.common["token"] = data.token;
                 setToken(data.token);
                 localStorage.setItem("token", data.token);
