@@ -41,12 +41,27 @@ export const login = async (req, res) => {
     try {
         const {email, password} = req.body;
 
+        if(!email || !password){
+            return res.status(400).json({
+                success : false,
+                message : "Email and password are required"
+            })
+        }
+
         const userData = await User.findOne({email});
+
+        // checks whether the user exists
+        if(!userData){
+            return res.status(401).json({
+                success : false,
+                message : "Invalid email or password"
+            })
+        }
 
         const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
         if(!isPasswordCorrect){
-            return res.json({success: false, message: "Invalid credentials"});
+            return res.status(401).json({success: false, message: "Invalid credentials"});
         }
 
         const token = generateToken(userData._id);
@@ -55,7 +70,7 @@ export const login = async (req, res) => {
 
     } catch (error) {
         console.log(error.message);
-        res.json({success: false, message: error.message});
+        res.status(500).json({success: false, message: error.message});
     }
 }
 
