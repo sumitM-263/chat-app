@@ -26,9 +26,12 @@ export const signup = async (req, res) => {
             fullName, email, password: hashedPassword, bio
         });
 
+        const userData = newUser.toObject();
+        delete userData.password;
+
         const token = generateToken(newUser._id);
 
-        res.json({success: true, userData: newUser, token, message: "Account created successfully"});
+        res.json({success: true, userData, token, message: "Account created successfully"});
 
     } catch (error) {
         console.log(error.message);
@@ -66,7 +69,10 @@ export const login = async (req, res) => {
 
         const token = generateToken(userData._id);
 
-        res.json({success: true, userData, token, message: "Login successful"});
+        const userDataResponse = userData.toObject();
+        delete userDataResponse.password;
+
+        res.json({success: true, userDataResponse, token, message: "Login successful"});
 
     } catch (error) {
         console.log(error.message);
