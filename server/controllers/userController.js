@@ -72,7 +72,7 @@ export const login = async (req, res) => {
         const userDataResponse = userData.toObject();
         delete userDataResponse.password;
 
-        res.json({success: true, userDataResponse, token, message: "Login successful"});
+        res.json({success: true, userData: userDataResponse, token, message: "Login successful"});
 
     } catch (error) {
         console.log(error.message);

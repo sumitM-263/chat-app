@@ -24,11 +24,11 @@ export const AuthProvider = ({children}) => {
 
             if(data.success){
                 setAuthUser(data.user);
-                connectSocket(data.user);
+                connectSocket(data.user, token);
             }
             
         } catch (error) {
-            toast.error(error.message);
+            // toast.error(error.message);
 
         }
     }
@@ -40,7 +40,7 @@ export const AuthProvider = ({children}) => {
 
             if(data.success){
                 setAuthUser(data.userData);
-                connectSocket(data.userData);
+                connectSocket(data.userData, data.token);
                 axios.defaults.headers.common["token"] = data.token;
                 setToken(data.token);
                 localStorage.setItem("token", data.token);
@@ -61,7 +61,11 @@ export const AuthProvider = ({children}) => {
         setOnlineUsers([]);
         axios.defaults.headers.common["token"] = null;
         toast.success("Logged out successfully");
-        socket.disconnect();
+        
+        if(socket){
+            socket.disconnect();
+            setSocket(null);
+        }
         
     }
 
@@ -80,13 +84,14 @@ export const AuthProvider = ({children}) => {
     }
 
     // connect socket function to handle socket connection and online users updates 
-    const connectSocket = (userData) => {
-        if(!userData || socket?.connected) return;
+    const connectSocket = (userData, authToken) => {
+        if(!userData || !authToken || socket?.connected) return;
 
         const newSocket = io(backendUrl, {
-            query: {
-                userId: userData._id,
-            }
+            auth: {
+                token: authToken
+            },
+            autoConnect: false
         });
 
         newSocket.connect();
@@ -94,6 +99,10 @@ export const AuthProvider = ({children}) => {
 
         newSocket.on("getOnlineUsers", (userIds) => {
             setOnlineUsers(userIds);
+        });
+
+        newSocket.on("connect_error", (error) => {
+            console.log("Socket connection failed: ", error.message);
         });
     }
 

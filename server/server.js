@@ -6,6 +6,7 @@ import { connectDB } from './lib/db.js';
 import userRouter from './routes/userRoutes.js';
 import messageRouter from './routes/messageRoutes.js';
 import { Server } from 'socket.io';
+import socketAuth from './middlewares/socketAuth.js';
 
 // create express app and http server
 const app = express();
@@ -19,10 +20,12 @@ export const io = new Server(server, {
 // store online users
 export const userSocketMap = {};  // {userId: socketId}
 
+io.use(socketAuth);
+
 
 // socket.io connection handler
 io.on("connection", (socket) => {
-    const userId = socket.handshake.query.userId;
+    const userId = socket.data.userId;
     console.log("User connected", userId);
 
     if(userId) userSocketMap[userId] = socket.id;
@@ -32,7 +35,11 @@ io.on("connection", (socket) => {
 
     socket.on("disconnect", () => {
         console.log("User Disconnected", userId);
-        delete userSocketMap[userId];
+
+        if(userSocketMap[userId] === socket.id) {
+            delete userSocketMap[userId];
+        }
+
         io.emit("getOnlineUsers", Object.keys(userSocketMap));
     })
 
