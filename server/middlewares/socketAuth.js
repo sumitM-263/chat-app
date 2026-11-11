@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
-import User from "./models/User.js";
+import User from "../models/User.js";
 
-export default socketAuth = async (socket, next) =>{
+const socketAuth = async (socket, next) =>{
     try {
         
         const token = socket.handshake.auth?.token;
@@ -26,3 +26,5 @@ export default socketAuth = async (socket, next) =>{
         next(new Error("Authentication error: Invalid token"));
     }
 }
+
+export default socketAuth;
